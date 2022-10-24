@@ -36,3 +36,52 @@
     transform: rotate(360deg);
   }
 }
+.searchbardiv {
+  position: relative;
+  border: 1px solid grey;
+  width: 300px;
+  border-radius: 5px;
+  padding: 10px;
+  
+}
+.searchbar {
+  /* padding: 10px; */
+  border: none;
+  
+}
+.searchbar:focus {
+  /* padding: 10px; */
+  outline: none;
+  margin: 10px;
+}
+
+.searchbarlist {
+  /* position: absolute; */
+  /* top: 10%; */
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+  max-height: 200px;
+  overflow: auto;
+  padding: 2px;
+
+}
+
+.list-item{
+  text-align: start;
+  padding: 5px 2px;
+  border-bottom: 1px solid black;
+  cursor: pointer;
+
+}
+
+.tag{
+  padding: 3px 10px;
+  border-radius: 10px;
+  background-color: slategrey;
+  color:white;
+  cursor: pointer;
+  margin: 3px 1px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+}
