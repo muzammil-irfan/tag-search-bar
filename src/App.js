@@ -24,12 +24,16 @@ function App() {
       }
     });
     setFilteredData(newData);
-    if(focus && values.length === 0){
+    if(focus && value.length === 0){
       setFocus(false)
+    } else{
+      setFocus(true)
     }
   };
   const handleFocus = (e)=>{
-    setFocus(true);
+    if(values.length > 0){
+      setFocus(true);
+    }
   }
 
   function getHighlightedText(text, highlight) {
@@ -60,11 +64,11 @@ function App() {
           {
             focus &&
             <div className='searchbarlist'>
-              {filteredData.map(item=>{
+              {filteredData.length> 0  ? filteredData.map(item=>{
                 return(
                   <div className='list-item' onClick={()=>{handleClick(item)}}>{getHighlightedText(item,values)}</div>
                 )
-              })}
+              }) : <div className='list-item' >No match found</div>}
             </div>
           }
         </div>
