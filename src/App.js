@@ -74,7 +74,7 @@ function App() {
               return <Tag key={item} name={item} setTags={setTags} />
             })
           }
-          <input type="text" className='searchbar' value={values} onChange={handleChange} onFocus={handleFocus}  />
+          <input type="text" className='searchbar' placeholder="Search bar" value={values} onChange={handleChange} onFocus={handleFocus}  />
 
           {
             focus &&
