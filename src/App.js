@@ -1,91 +1,126 @@
-import React,{useState,useEffect} from 'react';
-import './App.css';
-import {AiFillCloseCircle} from 'react-icons/ai'
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import { AiFillCloseCircle } from "react-icons/ai";
+import axios from "axios";
 
 function App() {
-  const [values,setValues] = useState("");
-  const [focus,setFocus] = useState(false);
-  const [filteredData,setFilteredData] = useState(data);
-  const [tags,setTags] = useState([]);
-  useEffect(()=>{
-    axios.get(`https://replication.sparkapi.com/Reso/OData/Property`,{
-       headers: { Authorization: `Bearer 5b1yjs0ey125hata96j19vdhl`,"Content-Type":"application/x-www-form-urlencoded"},
-       params:{
-        "$filter":""
-       }
-    })
-    .then(res=>{
-      console.log("res",res);
-    })
-    .catch(err=>{
-      console.log("err",err);
-    })
-  },[])
-  const handleChange = (e)=>{
-    const {value} = e.target;
+  const [values, setValues] = useState("");
+  const [focus, setFocus] = useState(false);
+  const [filteredData, setFilteredData] = useState(data);
+  const [tags, setTags] = useState([]);
+  useEffect(() => {
+    axios
+      .get(`https://replication.sparkapi.com/Reso/OData/Property`, {
+        headers: {
+          Authorization: `Bearer 5b1yjs0ey125hata96j19vdhl`,
+          Accept: "application/json",
+          "X-SparkApi-User-Agent": "KAAR",
+        },
+
+        //  params:{
+        //   "$filter":""
+        //  }
+      })
+      .then((res) => {
+        console.log("res", res);
+      })
+      .catch((err) => {
+        console.log("err", err);
+      });
+  }, []);
+  const handleChange = (e) => {
+    const { value } = e.target;
     setValues(value);
-    const newData = data.filter(item=>{
+    const newData = data.filter((item) => {
       const smallItem = item.toLowerCase();
       const smallValues = value.toLowerCase();
-      
-      if(smallValues.includes(" ")){
-        return smallValues.split(" ").map(newItem =>{
-          const smallNewItem = newItem.toLowerCase();
-          return smallValues.includes(smallNewItem);
-        }).length > 0;
+
+      if (smallValues.includes(" ")) {
+        return (
+          smallValues.split(" ").map((newItem) => {
+            const smallNewItem = newItem.toLowerCase();
+            return smallValues.includes(smallNewItem);
+          }).length > 0
+        );
       } else {
         return smallItem.includes(smallValues);
       }
     });
     setFilteredData(newData);
-    if(focus && value.length === 0){
-      setFocus(false)
-    } else{
-      setFocus(true)
-    }
-  };
-  const handleFocus = (e)=>{
-    if(values.length > 0){
+    if (focus && value.length === 0) {
+      setFocus(false);
+    } else {
       setFocus(true);
     }
-  }
+  };
+  const handleFocus = (e) => {
+    if (values.length > 0) {
+      setFocus(true);
+    }
+  };
 
   function getHighlightedText(text, highlight) {
     // Split text on highlight term, include term itself into parts, ignore case
-    const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
-    return <span>{parts.map(part => part.toLowerCase() === highlight.toLowerCase() ? <b key={part}>{part}</b> : part)}</span>;
-}
-  const handleClick = (item=>{
+    const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+    return (
+      <span>
+        {parts.map((part) =>
+          part.toLowerCase() === highlight.toLowerCase() ? (
+            <b key={part}>{part}</b>
+          ) : (
+            part
+          )
+        )}
+      </span>
+    );
+  }
+  const handleClick = (item) => {
     const newTagData = [...tags];
     newTagData.push(item);
     setTags(newTagData);
-    setFilteredData(prevData=>prevData.filter(dataItem=>dataItem!==item));
-    setFocus(false)
-    setValues("")
-  })
+    setFilteredData((prevData) =>
+      prevData.filter((dataItem) => dataItem !== item)
+    );
+    setFocus(false);
+    setValues("");
+  };
   return (
-    <div className="App" style={{padding:"20px"}}>
+    <div className="App" style={{ padding: "20px" }}>
       <div>
-        <div className='searchbardiv'>
-          {
-            tags.length>0 && 
-            tags.map(item=>{
-              return <Tag key={item} name={item} setTags={setTags} />
-            })
-          }
-          <input type="text" className='searchbar' placeholder="Search bar" value={values} onChange={handleChange} onFocus={handleFocus}  />
+        <div className="searchbardiv">
+          {tags.length > 0 &&
+            tags.map((item) => {
+              return <Tag key={item} name={item} setTags={setTags} />;
+            })}
+          <input
+            type="text"
+            className="searchbar"
+            placeholder="Search bar"
+            value={values}
+            onChange={handleChange}
+            onFocus={handleFocus}
+          />
 
-          {
-            focus &&
-            <div className='searchbarlist'>
-              {filteredData.length> 0  ? filteredData.map(item=>{
-                return(
-                  <div className='list-item' onClick={()=>{handleClick(item)}}>{getHighlightedText(item,values)}</div>
-                )
-              }) : <div className='list-item' >No match found</div>}
+          {focus && (
+            <div className="searchbarlist">
+              {filteredData.length > 0 ? (
+                filteredData.map((item) => {
+                  return (
+                    <div
+                      className="list-item"
+                      onClick={() => {
+                        handleClick(item);
+                      }}
+                    >
+                      {getHighlightedText(item, values)}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="list-item">No match found</div>
+              )}
             </div>
-          }
+          )}
         </div>
       </div>
     </div>
@@ -93,16 +128,17 @@ function App() {
 }
 
 export default App;
-const Tag = ({name,setTags})=>{
-  const handleClick = ()=>{
-    setTags(prevValue=>prevValue.filter((item)=>item!== name))
-  }
+const Tag = ({ name, setTags }) => {
+  const handleClick = () => {
+    setTags((prevValue) => prevValue.filter((item) => item !== name));
+  };
   return (
-    <div className='tag' onClick={handleClick}>
-      {name.length>30? name.slice(0,30)+"...":name} <AiFillCloseCircle size="24px" />
+    <div className="tag" onClick={handleClick}>
+      {name.length > 30 ? name.slice(0, 30) + "..." : name}{" "}
+      <AiFillCloseCircle size="24px" />
     </div>
-  )
-}
+  );
+};
 const data = `777 Brockton Avenue, Abington MA 2351
 30 Memorial Drive, Avon MA 2322
 250 Hartford Avenue, Bellingham MA 2019
