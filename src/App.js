@@ -1,12 +1,27 @@
-import React,{useState} from 'react';
+import React,{useState,useEffect} from 'react';
 import './App.css';
 import {AiFillCloseCircle} from 'react-icons/ai'
+import axios from 'axios';
 
 function App() {
   const [values,setValues] = useState("");
   const [focus,setFocus] = useState(false);
   const [filteredData,setFilteredData] = useState(data);
   const [tags,setTags] = useState([]);
+  useEffect(()=>{
+    axios.get(`https://replication.sparkapi.com/Reso/OData/Property`,{
+       headers: { Authorization: `Bearer 5b1yjs0ey125hata96j19vdhl`,"Content-Type":"application/x-www-form-urlencoded"},
+       params:{
+        "$filter":""
+       }
+    })
+    .then(res=>{
+      console.log("res",res);
+    })
+    .catch(err=>{
+      console.log("err",err);
+    })
+  },[])
   const handleChange = (e)=>{
     const {value} = e.target;
     setValues(value);
