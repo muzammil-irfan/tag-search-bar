@@ -2,13 +2,25 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import { AiFillCloseCircle } from "react-icons/ai";
 import axios from "axios";
+import { GoogleMap, LoadScript,Marker } from '@react-google-maps/api';
+
+const containerStyle = {
+  width: '80vw',
+  height: '80vh'
+};
+
+const center = {
+  lat: -3.745,
+  lng: -38.523
+};
 
 function App() {
   const [values, setValues] = useState("");
   const [focus, setFocus] = useState(false);
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState([]);
   const [tags, setTags] = useState([]);
-  useEffect(() => {
+
+  const fetcher = (query,data)=>{
     axios
       .get(`https://replication.sparkapi.com/Reso/OData/Property`, {
         headers: {
@@ -17,36 +29,31 @@ function App() {
           "X-SparkApi-User-Agent": "KAAR",
         },
 
-        //  params:{
-        //   "$filter":""
-        //  }
+         params:{ 
+          "$filter":`PropertyType eq 'Single Family' and MlsStatus eq 'Active'${query && ` and contains(UnparsedAddress,'${query}')`}`,
+          "$select":"ListingId,MlsStatus,OnMarketDate,MajorChangeTimestamp,MajorChangeType,Latitude,Longitude,UnparsedAddress,PropertyType,PublicRemarks,BuildingAreaTotal,LotSizeAcres,ListPrice,BedroomsTotal,BathroomsFull,BathroomsHalf,GarageSpaces,VirtualTourURLBranded,VideosCount,LotSizeDimensions",
+          "$expand":"Media",
+          "$top":`5`
+         }
       })
       .then((res) => {
-        console.log("res", res);
+        data(res.data);
       })
       .catch((err) => {
         console.log("err", err);
       });
+  }
+  useEffect(() => {
+    fetcher("",(e)=>{
+      setFilteredData(e.value);
+    })
   }, []);
   const handleChange = (e) => {
     const { value } = e.target;
     setValues(value);
-    const newData = data.filter((item) => {
-      const smallItem = item.toLowerCase();
-      const smallValues = value.toLowerCase();
-
-      if (smallValues.includes(" ")) {
-        return (
-          smallValues.split(" ").map((newItem) => {
-            const smallNewItem = newItem.toLowerCase();
-            return smallValues.includes(smallNewItem);
-          }).length > 0
-        );
-      } else {
-        return smallItem.includes(smallValues);
-      }
+    fetcher(value,(e)=>{
+      setFilteredData(e.value);
     });
-    setFilteredData(newData);
     if (focus && value.length === 0) {
       setFocus(false);
     } else {
@@ -90,12 +97,12 @@ function App() {
         <div className="searchbardiv">
           {tags.length > 0 &&
             tags.map((item) => {
-              return <Tag key={item} name={item} setTags={setTags} />;
+              return <Tag key={item} data={item} setTags={setTags} />;
             })}
           <input
             type="text"
             className="searchbar"
-            placeholder="Search bar"
+            placeholder="City, Neighborhood, Zip, Address"
             value={values}
             onChange={handleChange}
             onFocus={handleFocus}
@@ -112,7 +119,7 @@ function App() {
                         handleClick(item);
                       }}
                     >
-                      {getHighlightedText(item, values)}
+                      {getHighlightedText(item.UnparsedAddress, values)}
                     </div>
                   );
                 })
@@ -123,22 +130,60 @@ function App() {
           )}
         </div>
       </div>
+      <div style={{height:"100vh",width:"100vw",position:"relative",margin:"10px 0px"}}>
+        
+        <LoadScript
+      // googleMapsApiKey="YOUR_API_KEY"
+    >
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={center}
+        zoom={5}
+      >
+        { /* Child components, such as markers, info windows, etc. */ }
+        {
+          tags.length > 0 && tags.map(item=>{
+            return <Marker position={{lat:item.Latitude,lng:item.Longitude}} />
+          })
+        }
+      </GoogleMap>
+    </LoadScript>
+      </div>
     </div>
   );
 }
 
-export default App;
-const Tag = ({ name, setTags }) => {
+export default App; 
+
+
+const Tag = ({ data, setTags }) => {
   const handleClick = () => {
-    setTags((prevValue) => prevValue.filter((item) => item !== name));
+    setTags((prevValue) => prevValue.filter((item) => item.UnparsedAddress !== data.UnparsedAddress));
   };
   return (
     <div className="tag" onClick={handleClick}>
-      {name.length > 30 ? name.slice(0, 30) + "..." : name}{" "}
+      {data.UnparsedAddress.length > 30 ? data.UnparsedAddress.slice(0, 30) + "..." : data.UnparsedAddress}{" "}
       <AiFillCloseCircle size="24px" />
     </div>
   );
 };
+
+// const Map = withScriptjs(withGoogleMap((props) =>(
+//   <GoogleMap
+//     defaultZoom={8}
+//     defaultCenter={{ lat: -34.397, lng: 150.644 }}
+//   >
+//     {/* {props.arr && 
+//     props.arr.map(item=>{
+//       console.log(item);
+//     }) */}
+//     <Marker position={{ lat: -34.397, lng: 150.644 }} />
+//     {/* } */}
+//   </GoogleMap>
+//   )))
+
+
+/*
 const data = `777 Brockton Avenue, Abington MA 2351
 30 Memorial Drive, Avon MA 2322
 250 Hartford Avenue, Bellingham MA 2019
@@ -373,3 +418,4 @@ const data = `777 Brockton Avenue, Abington MA 2351
 1300 Montgomery Highway, Vestavia Hills AL 35216
 4538 Us Hwy 231, Wetumpka AL 36092
 2575 Us Hwy 43, Winfield AL 35594`.split("\n");
+*/
